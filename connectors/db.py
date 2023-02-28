@@ -7,8 +7,10 @@ import logging
 import mysql.connector
 
 # Enable logging
+import constants
+
 logging.basicConfig(
-    format="%(asctime)s - %(name)s - %(levelname)s - %(message)s", level=logging.INFO
+    format=constants.LOG_FORMAT, level=logging.INFO
 )
 logger = logging.getLogger(__name__)
 
@@ -62,7 +64,7 @@ def run_update(stmt: str, variables: tuple) -> bool:
     return True
 
 
-def connect(params: dict):
+def connect(params: dict) -> None:
     """Connect to the database"""
     global connection
 

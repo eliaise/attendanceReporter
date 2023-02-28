@@ -7,8 +7,10 @@ import logging
 from configparser import ConfigParser
 
 # Enable logging
+import constants
+
 logging.basicConfig(
-    format="%(asctime)s - %(name)s - %(levelname)s - %(message)s", level=logging.INFO
+    format=constants.LOG_FORMAT, level=logging.INFO
 )
 logger = logging.getLogger(__name__)
 
@@ -23,7 +25,7 @@ def read() -> dict:
 
     return {
         "bot_token": config["Telegram"]["BOT_TOKEN"],
-        "drive_token": config["Google"]["DRIVE_TOKEN"],
+        "admin_email": config["Google"]["ADMIN_EMAIL"],
         "db_host": config["MySQL"]["HOST"],
         "db_user": config["MySQL"]["USER"],
         "db_pass": config["MySQL"]["PASS"],

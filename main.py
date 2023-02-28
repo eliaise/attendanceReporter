@@ -10,9 +10,7 @@ from telegram import (
     Update,
     Bot,
     InlineKeyboardButton,
-    InlineKeyboardMarkup,
-    ReplyKeyboardMarkup,
-    ReplyKeyboardRemove
+    InlineKeyboardMarkup
 )
 from telegram.ext import (
     Application,
@@ -23,12 +21,13 @@ from telegram.ext import (
     filters, CallbackQueryHandler,
 )
 from re import search
-import config, db
-
+import config
+from connectors import db
+import constants
 
 # Enable logging
 logging.basicConfig(
-    format="%(asctime)s - %(name)s - %(levelname)s - %(message)s", level=logging.INFO
+    format=constants.LOG_FORMAT, level=logging.INFO
 )
 logger = logging.getLogger(__name__)
 
@@ -80,7 +79,7 @@ async def notify(user_id: int, name: str, title: str, department: str) -> bool:
 
     # find the person in-charge
     stmt = "SELECT chatId FROM users where department = %s and role = 'IC'"
-    result = db.run_select(stmt, (department, ))
+    result = db.run_select(stmt, (department,))
 
     if result:
         # contact this IC
@@ -136,7 +135,7 @@ async def handle_department(update: Update, context: ContextTypes.DEFAULT_TYPE) 
     department = update.message.text
 
     # test whether the department is valid
-    match = search("^[a-zA-Z0-9 ]{2,5}$", department)
+    match = search(constants.REGEX_DEPARTMENT, department)
     if not match:
         logger.info("User {} submitted an invalid department. Restarting...")
         await update.message.reply_text("Department given is invalid. "
@@ -178,7 +177,7 @@ async def handle_title(update: Update, context: ContextTypes.DEFAULT_TYPE) -> in
     title = update.message.text.upper()
 
     # test whether this title is valid
-    match = search("^[A-Z0-9]{3,4}$", title)
+    match = search(constants.REGEX_TITLE, title)
     if not match:
         logger.info("User {} submitted an invalid title. Restarting...")
         await update.message.reply_text("Title given is invalid. "
@@ -197,7 +196,7 @@ async def handle_name(update: Update, context: ContextTypes.DEFAULT_TYPE) -> int
     name = update.message.text
 
     # test whether this name is valid
-    match = search("^[a-zA-Z ]{1,100}$", name)
+    match = search(constants.REGEX_NAME, name)
     if not match:
         logger.info("User {} submitted an invalid name. Restarting...")
         await update.message.reply_text("Name given contains invalid characters or is too long. "
@@ -218,7 +217,7 @@ async def handle_register(update: Update, context: ContextTypes.DEFAULT_TYPE) ->
 
     # check if this user exists in database
     stmt = "SELECT name, accStatus FROM users WHERE userId = %s"
-    result = db.run_select(stmt, (user_id, ))
+    result = db.run_select(stmt, (user_id,))
 
     if result:
         logger.info("User {} exists in database".format(user_id))
