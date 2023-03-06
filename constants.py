@@ -4,4 +4,7 @@ REGEX_DEPARTMENT = "^[a-zA-Z0-9 ]{2,5}$"
 
 LOG_FORMAT = "%(asctime)s - %(name)s - %(levelname)s - %(message)s"
 
-SHEET_NAME = "Attendance_%d%b%Y"
+WORKBOOK_NAME = "Attendance_%b%Y"
+SHEET_NAME = "%d%b"
+SHEET_ROWS = 250
+SHEET_COLUMNS = 4

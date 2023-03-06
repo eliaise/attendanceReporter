@@ -1,6 +1,11 @@
 """
 Main logic for the bot.
 
+Methods starting with "handle" are for the respective commands issued by the user.
+E.g.
+    handle_register:    /register
+    handle_name:        follow-up to /register command, for handling the user's name
+
 Author: eliaise
 """
 
@@ -242,7 +247,7 @@ async def handle_register(update: Update, context: ContextTypes.DEFAULT_TYPE) ->
     return NAME
 
 
-async def display_help(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
+async def handle_help(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
     """Prints out the help message."""
     await update.message.reply_text("This bot is updates your attendance. "
                                     "/register: starts the registration process "
@@ -267,7 +272,7 @@ def main() -> None:
     # start telegram application object
     application = Application.builder().token(bot_token).build()
 
-    application.add_handler(CommandHandler("help", display_help))
+    application.add_handler(CommandHandler("help", handle_help))
     registration_handler = ConversationHandler(
         entry_points=[CommandHandler("register", handle_register)],
         states={
