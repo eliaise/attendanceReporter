@@ -20,9 +20,44 @@ connection = None
 book_name = None    # the target book name, updated daily
 sheet_name = None   # the target sheet name, updated monthly
 
+values = None       # values in all rows and columns
 
-def create(admin=None) -> None:
-    """Create a new spreadsheet"""
+
+def locate(user_id: str) -> str:
+    """
+    Returns the cell for the requested user_id
+
+    Possible error values:
+        empty: values is empty
+        not_found: unable to find the requested user
+    """
+    logger.info("Locating user {}".format(user_id))
+    row_num = 2         # first row is index 1, which is the header
+
+    if not values:
+        logger.info("Values is empty.")
+        return "empty"
+
+    for row in values:
+        if row[0] == user_id:
+            return "D{}".format(row_num)
+        row += 1
+
+    # user is not found
+    # possible 2 reasons:
+    # 1. user does not exist (checks should have been done before calling this function)
+    # 2. user's account status was updated after the creation of the spreadsheet
+    return "not_found"
+
+
+def create(admin=None) -> int:
+    """
+    Create a new spreadsheet
+
+    Returns the following status code:
+        0: created
+        1: worksheet exists
+    """
     logger.info("Creating new spreadsheet.")
     global book_name, sheet_name, connection
 
@@ -48,9 +83,13 @@ def create(admin=None) -> None:
     try:
         sheet = book.worksheet(sheet_name)
         logger.info("Worksheet found.")
+
+        return 1
     except gspread.exceptions.WorksheetNotFound:
         logger.info("Worksheet not found. Creating.")
         sheet = book.add_worksheet(title=constants.SHEET_NAME, rows=constants.SHEET_ROWS, cols=constants.SHEET_COLUMNS)
+
+    return 0
 
 
 def update_cell(cell: str, cell_data: str) -> None:
@@ -103,7 +142,6 @@ def connect() -> None:
     global connection
 
     connection = gspread.service_account(filename='../config/gg_creds.json')
-    book = connection.open(book_name)
 
 
 def main() -> None:

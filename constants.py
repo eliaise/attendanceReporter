@@ -8,3 +8,5 @@ WORKBOOK_NAME = "Attendance_%b%Y"
 SHEET_NAME = "%d%b"
 SHEET_ROWS = 250
 SHEET_COLUMNS = 4
+
+SELECT_ACTIVE_USERS = "SELECT userId, title, name, department, NULL AS status FROM users WHERE accStatus = 1"

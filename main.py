@@ -27,10 +27,12 @@ from telegram.ext import (
 )
 from re import search
 import config
-from connectors import db
+from connectors import db, ggsheets
 import constants
 
 # Enable logging
+from workers import sheetWorker
+
 logging.basicConfig(
     format=constants.LOG_FORMAT, level=logging.INFO
 )
@@ -247,6 +249,15 @@ async def handle_register(update: Update, context: ContextTypes.DEFAULT_TYPE) ->
     return NAME
 
 
+async def handle_update(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
+    """Handles the user's status update."""
+    user_id = update.message.from_user.id
+    status = update.message.text
+    logger.info("Updating the status to {} for user {}".format(status, user_id))
+
+    # TODO: update user's status
+
+
 async def handle_help(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
     """Prints out the help message."""
     await update.message.reply_text("This bot is updates your attendance. "
@@ -273,6 +284,7 @@ def main() -> None:
     application = Application.builder().token(bot_token).build()
 
     application.add_handler(CommandHandler("help", handle_help))
+    application.add_handler(CommandHandler("update", handle_update))
     registration_handler = ConversationHandler(
         entry_points=[CommandHandler("register", handle_register)],
         states={
@@ -288,6 +300,10 @@ def main() -> None:
 
     application.add_handler(registration_handler)
     application.add_handler(CallbackQueryHandler(handle_notify, pattern='^(Approve|Reject) [1-9]{1,}$'))
+
+    # create spreadsheet, and schedule subsequent creation of spreadsheets
+    ggsheets.connect()
+    sheetWorker.init(configs.get('admin_email'))
 
     # poll for updates
     application.run_polling()
